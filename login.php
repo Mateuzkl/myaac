@@ -160,8 +160,8 @@ switch ($action) {
 			sendError(($inputEmail != false ? 'Email' : 'Account name') . ' or password is not correct.');
 		}
 
-		$current_password = encrypt((USE_ACCOUNT_SALT ? $account->salt : '') . $request->password);
-		if (!$account || $account->password != $current_password) {
+		$is_valid = verify_password($request->password, $account->password, USE_ACCOUNT_SALT ? $account->salt : '');
+		if (!$account || !$is_valid) {
 			$limiter->increment($ip);
 			if ($limiter->exceeded($ip)) {
 				sendError($ban_msg);
