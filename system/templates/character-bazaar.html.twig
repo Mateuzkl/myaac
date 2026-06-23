@@ -15,20 +15,20 @@
 
 {% if selected_auction %}
   <table width="100%" cellpadding="4" cellspacing="1">
-    <tr bgcolor="{{ config.vdarkborder }}"><td class="white" colspan="2"><b>{{ selected_auction.player_name }} — Auction #{{ selected_auction.id }}</b></td></tr>
+    <tr bgcolor="{{ config.vdarkborder }}"><td class="white" colspan="2"><b>{{ selected_auction.player_name|e }} — Auction #{{ selected_auction.id }}</b></td></tr>
     <tr bgcolor="{{ getStyle(1) }}"><td>Level / Vocation</td><td>{{ selected_auction.snapshot_level }} / {{ selected_auction.vocation_name }}</td></tr>
     <tr bgcolor="{{ getStyle(2) }}"><td>Current bid</td><td>{{ selected_auction.display_bid|number_format }} transferable Tibia Coins</td></tr>
     <tr bgcolor="{{ getStyle(1) }}"><td>Ends</td><td>{{ selected_auction.ends_at_text }}</td></tr>
-    <tr bgcolor="{{ getStyle(2) }}"><td>Description</td><td>{{ selected_auction.description }}</td></tr>
+    <tr bgcolor="{{ getStyle(2) }}"><td>Description</td><td>{{ selected_auction.description|e }}</td></tr>
   </table>
 
-  {% if selected_auction.status == 1 %}
+  {% if selected_auction.is_active %}
     <form method="post" action="{{ getLink('character-bazaar') }}?auction={{ selected_auction.id }}">
       <input type="hidden" name="csrf_token" value="{{ csrfToken() }}" />
       <input type="hidden" name="auction_id" value="{{ selected_auction.id }}" />
       <p>
         <label for="bid_amount">Your bid</label>
-        <input id="bid_amount" name="bid_amount" type="number" min="{{ selected_auction.display_bid + 1 }}" required />
+        <input id="bid_amount" name="bid_amount" type="number" min="{{ selected_auction.display_bid + 1 }}" max="4294967295" required />
         <input type="submit" name="place_bid" value="Place bid" {% if not logged or selected_auction.seller_account_id == viewer_account_id %}disabled{% endif %} />
       </p>
       {% if logged and selected_auction.seller_account_id == viewer_account_id %}<p>You cannot bid on your own character.</p>{% endif %}
@@ -52,7 +52,7 @@
   <tr bgcolor="{{ config.vdarkborder }}"><td class="white"><b>Character</b></td><td class="white"><b>Level</b></td><td class="white"><b>Vocation</b></td><td class="white"><b>Current bid</b></td><td class="white"><b>Ends</b></td><td></td></tr>
   {% for auction in active_auctions %}
     <tr bgcolor="{{ getStyle(loop.index) }}">
-      <td>{{ auction.player_name }}</td><td>{{ auction.snapshot_level }}</td><td>{{ auction.vocation_name }}</td>
+      <td>{{ auction.player_name|e }}</td><td>{{ auction.snapshot_level }}</td><td>{{ auction.vocation_name }}</td>
       <td>{{ auction.display_bid|number_format }} coins{% if auction.has_bidder %}<br/><small>Bid placed</small>{% endif %}</td>
       <td>{{ auction.ends_at_text }}</td><td><a href="{{ getLink('character-bazaar') }}?auction={{ auction.id }}">View / bid</a></td>
     </tr>
@@ -65,7 +65,7 @@
 <table width="100%" cellpadding="4" cellspacing="1">
   <tr bgcolor="{{ config.vdarkborder }}"><td class="white"><b>Character</b></td><td class="white"><b>Level</b></td><td class="white"><b>Final bid</b></td><td class="white"><b>Status</b></td><td class="white"><b>Finished</b></td></tr>
   {% for auction in finished_auctions %}
-    <tr bgcolor="{{ getStyle(loop.index) }}"><td>{{ auction.player_name }}</td><td>{{ auction.snapshot_level }}</td><td>{{ auction.display_bid|number_format }} coins</td><td>{{ auction.status == 2 ? 'Sold' : 'Expired without bid' }}</td><td>{{ auction.finished_at_text }}</td></tr>
+    <tr bgcolor="{{ getStyle(loop.index) }}"><td>{{ auction.player_name|e }}</td><td>{{ auction.snapshot_level }}</td><td>{{ auction.display_bid|number_format }} coins</td><td>{{ auction.status_label }}</td><td>{{ auction.finished_at_text }}</td></tr>
   {% else %}
     <tr bgcolor="{{ getStyle(1) }}"><td colspan="5">No finished auctions yet.</td></tr>
   {% endfor %}

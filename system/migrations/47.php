@@ -31,6 +31,7 @@ $up = function () use ($db) {
 			PRIMARY KEY (`id`),
 			KEY `idx_character_auctions_player_status` (`player_id`, `status`),
 			KEY `idx_character_auctions_status_end` (`status`, `end_at`),
+			KEY `idx_character_auctions_status_finished` (`status`, `finished_at`),
 			KEY `idx_character_auctions_seller` (`seller_account_id`),
 			KEY `idx_character_auctions_bidder` (`current_bidder_account_id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
@@ -41,8 +42,8 @@ $up = function () use ($db) {
 			`bid_amount` INT UNSIGNED NOT NULL,
 			`created_at` INT UNSIGNED NOT NULL,
 			PRIMARY KEY (`id`),
-			KEY `idx_character_auction_bids_auction` (`auction_id`),
-			KEY `idx_character_auction_bids_bidder` (`bidder_account_id`)
+			KEY `idx_character_auction_bids_auction` (`auction_id`, `created_at`),
+			KEY `idx_character_auction_bids_bidder` (`bidder_account_id`, `created_at`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4",
 		"CREATE TABLE IF NOT EXISTS `character_auction_history` (
 			`id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
