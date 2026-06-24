@@ -8,6 +8,7 @@ $config['menu_categories'] = [
 	MENU_CATEGORY_FORUM => ['id' => 'forum', 'name' => 'Forum'],
 	MENU_CATEGORY_LIBRARY => ['id' => 'library', 'name' => 'Library'],
 	MENU_CATEGORY_SHOP => ['id' => 'shops', 'name' => 'Shop'],
+	MENU_CATEGORY_BAZAAR => ['id' => 'bazaar', 'name' => 'Character Bazaar'],
 ];
 
 $config['menus'] = require __DIR__ . '/menus.php';

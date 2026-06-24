@@ -36,8 +36,10 @@ return [
 	],
 	MENU_CATEGORY_SHOP => [
 		'Buy Points' => 'points',
-		'Character Bazaar' => 'character-bazaar',
 		'Shop Offer' => 'gifts',
 		'Shop History' => 'gifts/history',
+	],
+	MENU_CATEGORY_BAZAAR => [
+		'Character Bazaar' => 'character-bazaar',
 	],
 ];

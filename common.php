@@ -96,6 +96,7 @@ const MENU_CATEGORY_COMMUNITY = 3;
 const MENU_CATEGORY_FORUM = 4;
 const MENU_CATEGORY_LIBRARY = 5;
 const MENU_CATEGORY_SHOP = 6;
+const MENU_CATEGORY_BAZAAR = 7;
 
 // otserv versions
 const OTSERV = 1;
