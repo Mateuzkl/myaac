@@ -173,7 +173,8 @@ function bazaarBuildAuctionQuery($db, array $filters): string
 	$skillOptions = bazaarSkillOptions();
 	$skillSql = $skillOptions[$filters['skill']]['sql'];
 	$displayBidSql = 'CASE WHEN ca.`current_bid` > 0 THEN GREATEST(ca.`start_price`, ca.`public_bid`) ELSE ca.`start_price` END';
-	$where = ['ca.`status` = ' . BAZAAR_STATUS_ACTIVE];
+	$now = time();
+	$where = ['ca.`status` = ' . BAZAAR_STATUS_ACTIVE, 'ca.`end_at` > ' . $now];
 
 	if ($filters['search'] !== '') {
 		$where[] = 'ca.`player_name` LIKE ' . $db->quote(bazaarLikeValue($filters['search']));
@@ -255,32 +256,13 @@ function bazaarHistory($db, int $auctionId, ?int $accountId, string $action, str
 
 function bazaarStoreHistory($db, int $accountId, string $description, int $amount): void { /* store_history table not present in this schema */ }
 
+/**
+ * Auction finalization is handled by the game server (TFS).
+ * This function is intentionally empty to prevent web-side finalization races.
+ */
 function bazaarFinalizeExpired($db): void
 {
-	$now = time();
-	$rows = $db->query('SELECT *, `end_at` AS `ends_at` FROM `character_auctions` WHERE `status` = ' . BAZAAR_STATUS_ACTIVE . ' AND `end_at` <= ' . $now)->fetchAll();
-	foreach ($rows as $auction) {
-		$auctionId = (int)$auction['id'];
-		$currentBid = (int)$auction['current_bid'];
-		$bidderAccountId = (int)$auction['current_bidder_account_id'];
-		$sellerAccountId = (int)$auction['seller_account_id'];
-		$playerId = (int)$auction['player_id'];
-		$playerName = $auction['player_name'];
-
-		if ($currentBid > 0 && $bidderAccountId > 0) {
-			$commission = (int)floor($currentBid * ((int)$auction['commission_percent']) / 100);
-			$payout = $currentBid - $commission;
-			$db->query('START TRANSACTION');
-			$db->query('UPDATE `players` SET `account_id` = ' . $bidderAccountId . ' WHERE `id` = ' . $playerId);
-			$db->query('UPDATE `accounts` SET `tibia_coins` = `tibia_coins` + ' . $payout . ' WHERE `id` = ' . $sellerAccountId);
-			$db->query('UPDATE `character_auctions` SET `status` = ' . BAZAAR_STATUS_FINISHED . ', `winner_account_id` = ' . $bidderAccountId . ', `finished_at` = ' . $now . ' WHERE `id` = ' . $auctionId);
-			$db->query('COMMIT');
-			bazaarHistory($db, $auctionId, $bidderAccountId, 'finished', 'Auction finished and character transferred.');
-		} else {
-			$db->query('UPDATE `character_auctions` SET `status` = ' . BAZAAR_STATUS_CANCELLED . ', `finished_at` = ' . $now . ' WHERE `id` = ' . $auctionId);
-			bazaarHistory($db, $auctionId, $sellerAccountId, 'expired', 'Auction expired without bids.');
-		}
-	}
+	// Intentionally empty: TFS is the authority for finalization
 }
 
 function bazaarAccountCoins($db, int $accountId): int
@@ -801,19 +783,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		$errors[] = 'Invalid auction.';
 	} elseif ($action === 'bid') {
 		$amount = isset($_POST['amount']) ? (int)$_POST['amount'] : 0;
-		$auction = $db->query('SELECT *, `end_at` AS `ends_at` FROM `character_auctions` WHERE `id` = ' . $auctionId . ' LIMIT 1')->fetch();
-		if (!$auction || (int)$auction['status'] !== BAZAAR_STATUS_ACTIVE || (int)$auction['ends_at'] <= time()) {
-			$errors[] = 'This auction is no longer active.';
-		} elseif ((int)$auction['seller_account_id'] === $accountId) {
-			$errors[] = 'You cannot bid on your own character.';
+		
+		// Validate uint32 range (0 to 4,294,967,295)
+		if ($amount < 0 || $amount > 4294967295) {
+			$errors[] = 'Invalid bid amount. Must be between 0 and 4,294,967,295.';
 		} else {
-			$auction = bazaarDecorateAuction($auction);
-			$minimumBid = (int)$auction['minimum_bid'];
-			if ($amount < $minimumBid) {
-				$errors[] = 'Your bid is below the minimum required bid.';
-			} elseif (bazaarAccountCoins($db, $accountId) < $amount) {
-				$errors[] = 'You do not have enough transferable coins.';
+			$auction = $db->query('SELECT *, `end_at` AS `ends_at` FROM `character_auctions` WHERE `id` = ' . $auctionId . ' LIMIT 1')->fetch();
+			if (!$auction || (int)$auction['status'] !== BAZAAR_STATUS_ACTIVE || (int)$auction['ends_at'] <= time()) {
+				$errors[] = 'This auction is no longer active.';
+			} elseif ((int)$auction['seller_account_id'] === $accountId) {
+				$errors[] = 'You cannot bid on your own character.';
 			} else {
+				$auction = bazaarDecorateAuction($auction);
+				$minimumBid = (int)$auction['minimum_bid'];
+				if ($amount < $minimumBid) {
+					$errors[] = 'Your bid is below the minimum required bid.';
+				} elseif (bazaarAccountCoins($db, $accountId) < $amount) {
+					$errors[] = 'You do not have enough transferable coins.';
+				} else {
 				$db->query('START TRANSACTION');
 				$lockedAuction = $db->query('SELECT *, `end_at` AS `ends_at` FROM `character_auctions` WHERE `id` = ' . $auctionId . ' FOR UPDATE')->fetch();
 				$lockedAccount = $db->query('SELECT `tibia_coins` FROM `accounts` WHERE `id` = ' . $accountId . ' FOR UPDATE')->fetch();
@@ -856,10 +843,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						bazaarHistory($db, $auctionId, $accountId, 'lower_bid', 'Anonymous bid registered below the hidden winning bid.');
 						$messages[] = 'Your bid was registered, but another bidder currently has a higher hidden maximum bid.';
 					} else {
+						// Debit new bidder
 						$db->query('UPDATE `accounts` SET `tibia_coins` = `tibia_coins` - ' . $amount . ' WHERE `id` = ' . $accountId);
+						
+						// Refund previous bidder with overflow and missing account protection
 						if ($previousBidder > 0 && $previousBid > 0) {
-							$db->query('UPDATE `accounts` SET `tibia_coins` = `tibia_coins` + ' . $previousBid . ' WHERE `id` = ' . $previousBidder);
+							// Lock previous bidder account and check for overflow
+							$prevAccount = $db->query('SELECT `tibia_coins` FROM `accounts` WHERE `id` = ' . $previousBidder . ' FOR UPDATE')->fetch();
+							if ($prevAccount) {
+								$currentCoins = (int)$prevAccount['tibia_coins'];
+								$maxCoins = 4294967295;
+								if ($currentCoins <= $maxCoins - $previousBid) {
+									$result = $db->query('UPDATE `accounts` SET `tibia_coins` = `tibia_coins` + ' . $previousBid . ' WHERE `id` = ' . $previousBidder);
+									if (!$result || $db->affectedRows() !== 1) {
+										$db->query('ROLLBACK');
+										$errors[] = 'Failed to refund previous bidder. Transaction cancelled.';
+										goto bid_end;
+									}
+								} else {
+									$db->query('ROLLBACK');
+									$errors[] = 'Cannot refund previous bidder: coin balance would overflow. Contact administrator.';
+									goto bid_end;
+								}
+							} else {
+								$db->query('ROLLBACK');
+								$errors[] = 'Previous bidder account not found. Transaction cancelled.';
+								goto bid_end;
+							}
 						}
+						
 						$newPublicBid = $previousBid > 0 ? max($publicBid, $previousBid) : max($publicBid, $amount);
 						$db->query('UPDATE `character_auctions` SET `current_bid` = ' . $amount . ', `current_bidder_account_id` = ' . $accountId . ', `public_bid` = ' . $newPublicBid . ' WHERE `id` = ' . $auctionId);
 						$db->query('INSERT INTO `character_auction_bids` (`auction_id`, `bidder_account_id`, `bid_amount`, `created_at`) VALUES (' . $auctionId . ', ' . $accountId . ', ' . $amount . ', ' . time() . ')');
@@ -867,6 +879,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						bazaarHistory($db, $auctionId, $accountId, 'bid', 'Anonymous winning bid placed.');
 						$messages[] = 'Your bid has been placed.';
 					}
+					bid_end:
 				}
 			}
 		}
