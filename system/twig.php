@@ -22,7 +22,8 @@ $twig_loader = new Twig_FilesystemLoader(SYSTEM . 'templates');
 $twig = new MyAAC_Twig_EnvironmentBridge($twig_loader, array(
 	'cache' => CACHE . 'twig/',
 	'auto_reload' => $dev_mode,
-	'debug' => $dev_mode
+	'debug' => $dev_mode,
+	'autoescape' => 'html'
 ));
 
 $twig_loader->addPath(PLUGINS);

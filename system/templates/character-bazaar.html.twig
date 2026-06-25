@@ -1,0 +1,598 @@
+{% if errors is not empty %}
+	{% include 'error_box.html.twig' with {'errors': errors} %}
+{% endif %}
+{% if messages is not empty %}
+	{% for message in messages %}<p style="color: green; font-weight: bold;">{{ message }}</p>{% endfor %}
+{% endif %}
+
+<style>
+.BazaarDetailsTabs {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+	margin-bottom: 10px;
+}
+.BazaarDetailsTabs a {
+	background: #f4ead0;
+	border: 1px solid #c9ad75;
+	border-radius: 3px;
+	color: #5d4a2b;
+	display: inline-block;
+	font-size: 11px;
+	font-weight: bold;
+	padding: 5px 9px;
+	text-decoration: none;
+}
+.BazaarDetailsTabs a.Active {
+	background: #b89b38;
+	border-color: #8a711f;
+	color: #fff;
+}
+.BazaarInfoGrid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
+}
+.BazaarPanel {
+	background: #d4c0a1;
+	border: 1px solid #b8a27c;
+	margin-bottom: 10px;
+	padding: 8px;
+}
+.BazaarPanelTitle {
+	font-weight: bold;
+	margin: 0 0 7px 0;
+}
+.BazaarStatTable {
+	border-collapse: collapse;
+	width: 100%;
+}
+.BazaarStatTable td,
+.BazaarStatTable th {
+	border-bottom: 1px solid #b8a27c;
+	font-size: 11px;
+	padding: 4px 6px;
+}
+.BazaarStatTable th {
+	text-align: left;
+}
+.BazaarStatTable td:last-child,
+.BazaarStatTable th:last-child {
+	text-align: right;
+}
+.BazaarProgress {
+	background: #eee4c8;
+	border: 1px solid #b8a27c;
+	height: 7px;
+	margin-top: 2px;
+	overflow: hidden;
+}
+.BazaarProgress span {
+	background: #24b35a;
+	display: block;
+	height: 7px;
+}
+.BazaarItemGrid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+}
+.BazaarItem {
+	background: #cdbb9b;
+	border: 1px solid #b8a27c;
+	height: 42px;
+	position: relative;
+	text-align: center;
+	width: 42px;
+}
+.BazaarItem img {
+	height: 32px;
+	margin-top: 4px;
+	max-width: 32px;
+}
+.BazaarItemCount {
+	background: #2c3340;
+	border-radius: 2px;
+	bottom: 1px;
+	color: #fff;
+	font-size: 9px;
+	font-weight: bold;
+	line-height: 12px;
+	min-width: 12px;
+	padding: 0 2px;
+	position: absolute;
+	right: 1px;
+}
+.BazaarPillList {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 5px;
+}
+.BazaarPill {
+	background: #d9c8a8;
+	border: 1px solid #b8a27c;
+	border-radius: 3px;
+	font-size: 11px;
+	padding: 4px 7px;
+}
+.BazaarMuted {
+	color: #6d5a3b;
+	font-size: 11px;
+	font-style: italic;
+}
+@media (max-width: 720px) {
+	.BazaarInfoGrid {
+		grid-template-columns: 1fr;
+	}
+}
+</style>
+
+<div class="TableContainer">
+	<table class="Table3" cellpadding="0" cellspacing="0">
+		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">Character Bazaar</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
+		<tr><td><div class="InnerTableContainer">
+			{% if logged %}<p>Your transferable balance: <b>{{ coins|number_format }}</b> coins.</p>{% else %}<p>Log in to bid on character auctions.</p>{% endif %}
+			<p>Characters listed here are locked from game login until the auction finishes or is cancelled.</p>
+		</div></td></tr>
+	</table>
+</div>
+<br/>
+
+{% if cancelled_auction %}
+<div class="TableContainer">
+	<table class="Table3" cellpadding="0" cellspacing="0">
+		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">Auction Cancelled</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
+		<tr><td><div class="InnerTableContainer">
+			<p style="color: green; font-weight: bold;">Your auction for {{ cancelled_auction.player_name|e }} has been cancelled.</p>
+			<p>The character is no longer listed on the Character Bazaar.</p>
+			<p><a href="{{ getLink('character-bazaar') }}">Return to Character Bazaar</a></p>
+		</div></td></tr>
+	</table>
+</div>
+<br/>
+{% endif %}
+
+{% if confirm_cancel_auction %}
+<div class="TableContainer">
+	<table class="Table3" cellpadding="0" cellspacing="0">
+		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">Confirm Auction Cancellation</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
+		<tr><td><div class="InnerTableContainer">
+			<p style="color: red; font-weight: bold;">Do you really want to cancel the auction for {{ confirm_cancel_auction.player_name|e }}?</p>
+			<p>This action will remove the character from the Character Bazaar. The auction creation fee is not refunded.</p>
+			<table border="0" cellspacing="0" cellpadding="0">
+				<tr>
+					<td style="border:0;">
+						<form method="post" action="{{ getLink('character-bazaar') }}?auction={{ confirm_cancel_auction.id }}">
+							{{ csrf() }}
+							<input type="hidden" name="action" value="cancel"/>
+							<input type="hidden" name="auction_id" value="{{ confirm_cancel_auction.id }}"/>
+							<input type="hidden" name="confirm_cancel" value="yes"/>
+							<input type="submit" value="Yes, Cancel Auction"/>
+						</form>
+					</td>
+					<td style="border:0; padding-left: 10px;">
+						<a href="{{ getLink('character-bazaar') }}?auction={{ confirm_cancel_auction.id }}">No, Keep Auction</a>
+					</td>
+				</tr>
+			</table>
+		</div></td></tr>
+	</table>
+</div>
+<br/>
+{% endif %}
+
+{% if auction and not confirm_cancel_auction and not cancelled_auction %}
+<div class="TableContainer">
+	<table class="Table3" cellpadding="0" cellspacing="0">
+		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">{{ auction.player_name|e }}</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
+		<tr><td><div class="InnerTableContainer">
+			<table width="100%" cellspacing="1" cellpadding="4">
+				<tr bgcolor="{{ config.vdarkborder }}" class="white"><th colspan="2">Auction Details</th></tr>
+				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Level:</td><td>{{ auction.level }}</td></tr>
+				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">World:</td><td>{{ auction.world_name|e }} ({{ auction.world_type|e }})</td></tr>
+				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Vocation:</td><td>{{ auction.vocation_name|e }}</td></tr>
+				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">Outfit:</td><td style="height: 64px;"><img src="{{ auction.outfit_url }}" alt="{{ auction.player_name|e }} outfit" style="margin: -16px 0 -18px -10px;"/></td></tr>
+				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Start Price:</td><td>{{ auction.start_price|number_format }} coins</td></tr>
+				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">Visible Bid:</td><td>{{ auction.display_bid|number_format }} coins</td></tr>
+				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Sale Commission:</td><td>{{ auction.sale_commission_percent }}% retained by the server after a successful sale.</td></tr>
+				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">Ends:</td><td>{{ auction.ends_at_text }}</td></tr>
+				{% if auction.status == 3 %}
+					<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Time Left:</td><td><span style="color: red; font-weight: bold;">{{ auction.cancel_status_text|default('This auction was cancelled.') }}</span></td></tr>
+				{% elseif auction.status == 2 %}
+					<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Status:</td><td><span style="color: green; font-weight: bold;">This auction has finished.</span></td></tr>
+				{% else %}
+					<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Time Left:</td><td><span class="bazaar-countdown" data-ends-at="{{ auction.ends_at }}" style="color: red; font-weight: bold;">This auction ends in --:--:--</span></td></tr>
+				{% endif %}
+			</table>
+			{% if logged and auction.status == 2 and auction.seller_account_id == account_id %}
+				<br/>
+				<table width="100%" cellspacing="1" cellpadding="4">
+					<tr bgcolor="{{ config.vdarkborder }}" class="white"><th colspan="2">Seller Sale Summary</th></tr>
+					<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Final Sale Price:</td><td>{{ auction.current_bid|number_format }} coins</td></tr>
+					<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">Server Commission:</td><td>{{ auction.sale_commission_amount|number_format }} coins ({{ auction.sale_commission_percent }}%)</td></tr>
+					<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Seller Received:</td><td>{{ auction.seller_payout_amount|number_format }} coins</td></tr>
+				</table>
+			{% endif %}
+			{% if logged and auction.is_active and auction.seller_account_id != account_id %}
+				<form method="post" action="{{ getLink('character-bazaar') }}?auction={{ auction.id }}">
+					{{ csrf() }}
+					<input type="hidden" name="action" value="bid"/>
+					<input type="hidden" name="auction_id" value="{{ auction.id }}"/>
+					<p>Bid amount: <input type="number" name="amount" min="{{ auction.minimum_bid }}" value="{{ auction.minimum_bid }}"/> <input type="submit" value="Place Bid"/></p>
+				</form>
+			{% endif %}
+			{% if logged and auction.status == 1 and auction.seller_account_id == account_id and auction.current_bid == 0 %}
+				<form method="get" action="{{ getLink('character-bazaar') }}">
+					<input type="hidden" name="auction" value="{{ auction.id }}"/>
+					<input type="hidden" name="confirm_cancel" value="1"/>
+					<input type="submit" value="Cancel Auction"/>
+				</form>
+			{% endif %}
+			<h3>Recent Bid Activity</h3>
+			<table width="100%" cellspacing="1" cellpadding="4">
+				<tr bgcolor="{{ config.vdarkborder }}" class="white"><th>Bid</th><th>Date</th></tr>
+				{% for bid in bids %}<tr bgcolor="{{ getStyle(loop.index) }}"><td>Anonymous bid registered</td><td>{{ bid.created_at|date('M d Y, H:i:s') }}</td></tr>{% else %}<tr><td colspan="2">No bids yet.</td></tr>{% endfor %}
+			</table>
+		</div></td></tr>
+	</table>
+</div>
+<br/>
+{% endif %}
+
+{% if auction and auction_details and not confirm_cancel_auction and not cancelled_auction %}
+<div class="TableContainer">
+	<table class="Table3" cellpadding="0" cellspacing="0">
+		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">Character Details</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
+		<tr><td><div class="InnerTableContainer">
+			<div class="BazaarDetailsTabs">
+				{% for key, label in detail_tabs %}
+					<a class="{% if active_detail_tab == key %}Active{% endif %}" href="{{ getLink('character-bazaar') }}?auction={{ auction.id }}&tab={{ key }}">{{ label }}</a>
+				{% endfor %}
+			</div>
+
+			{% if active_detail_tab == 'general' %}
+				<div class="BazaarInfoGrid">
+					<div class="BazaarPanel">
+						<div class="BazaarPanelTitle">General</div>
+						<table class="BazaarStatTable">
+							{% for row in auction_details.general_left %}
+								<tr><td>{{ row.label }}</td><td>{{ row.value }}</td></tr>
+							{% endfor %}
+						</table>
+					</div>
+					<div class="BazaarPanel">
+						<div class="BazaarPanelTitle">Skills</div>
+						<table class="BazaarStatTable">
+							{% for row in auction_details.skills %}
+								<tr>
+									<td>{{ row.label }}</td>
+									<td style="width: 52px;">{{ row.value }}</td>
+									<td style="width: 130px; text-align: left;">
+										<div class="BazaarProgress"><span style="width: {{ row.progress }}%;"></span></div>
+									</td>
+								</tr>
+							{% endfor %}
+						</table>
+					</div>
+				</div>
+				<div class="BazaarInfoGrid">
+					<div class="BazaarPanel">
+						<div class="BazaarPanelTitle">Character Economy</div>
+						<table class="BazaarStatTable">
+							{% for row in auction_details.general_right %}
+								<tr><td>{{ row.label }}</td><td>{{ row.value }}</td></tr>
+							{% endfor %}
+						</table>
+					</div>
+					<div class="BazaarPanel">
+						<div class="BazaarPanelTitle">Auction Summary</div>
+						<table class="BazaarStatTable">
+							<tr><td>World</td><td>{{ auction.world_name|e }} ({{ auction.world_type|e }})</td></tr>
+							<tr><td>Vocation</td><td>{{ auction.vocation_name|e }}</td></tr>
+							<tr><td>Visible Bid</td><td>{{ auction.display_bid|number_format }} coins</td></tr>
+							<tr><td>Server Commission</td><td>{{ auction.sale_commission_percent }}%</td></tr>
+						</table>
+					</div>
+				</div>
+			{% elseif active_detail_tab == 'items' %}
+				<div class="BazaarPanel">
+					<div class="BazaarPanelTitle">Items ({{ auction_details.items.total|number_format }})</div>
+					{% for group_key, group_label in {'equipment':'Inventory','depot':'Depot','inbox':'Inbox','rewards':'Rewards','stash':'Stash'} %}
+						<div class="BazaarPanelTitle">{{ group_label }} ({{ auction_details.items[group_key]|length }})</div>
+						<div class="BazaarItemGrid">
+							{% for item in auction_details.items[group_key] %}
+								<div class="BazaarItem" title="{{ item.name|e('html_attr') }}{% if item.source %} - {{ item.source|e('html_attr') }}{% endif %}">
+									<img src="{{ item.image_url|e('html_attr') }}" alt="{{ item.name|e('html_attr') }}" onerror="this.onerror=null;this.src='{{ item.fallback_url|e('html_attr') }}';"/>
+									{% if item.count > 1 %}<span class="BazaarItemCount">{{ item.count > 99 ? '99+' : item.count }}</span>{% endif %}
+								</div>
+							{% else %}
+								<span class="BazaarMuted">No public {{ group_label|lower }} items found.</span>
+							{% endfor %}
+						</div>
+						<br/>
+					{% endfor %}
+				</div>
+			{% elseif active_detail_tab == 'cosmetics' %}
+				<div class="BazaarPanel">
+					<div class="BazaarPanelTitle">Outfits ({{ auction_details.cosmetics.outfits|length }})</div>
+					<div class="BazaarPillList">
+						{% for row in auction_details.cosmetics.outfits %}
+							<span class="BazaarPill">{{ row.name }}{% if row.addons > 0 %} - Addons {{ row.addons }}{% endif %}</span>
+						{% else %}
+							<span class="BazaarMuted">No public outfits found.</span>
+						{% endfor %}
+					</div>
+				</div>
+				<div class="BazaarPanel">
+					<div class="BazaarPanelTitle">Mounts ({{ auction_details.cosmetics.mounts|length }})</div>
+					<div class="BazaarPillList">
+						{% for row in auction_details.cosmetics.mounts %}
+							<span class="BazaarPill">{{ row.name }}</span>
+						{% else %}
+							<span class="BazaarMuted">No public mounts found.</span>
+						{% endfor %}
+					</div>
+				</div>
+				<div class="BazaarPanel"><div class="BazaarPanelTitle">Auras and Login Screens</div><span class="BazaarMuted">No public cosmetic table was found for auras or login screens.</span></div>
+			{% elseif active_detail_tab == 'blessings' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><th>Blessing</th><th>Status</th></tr>
+						{% for row in auction_details.blessings %}
+							<tr><td>{{ row.name }}</td><td>{% if row.active %}Active{% else %}Not active{% endif %}</td></tr>
+						{% endfor %}
+					</table>
+				</div>
+			{% elseif active_detail_tab == 'charms' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Charm Expansion</td><td>{% if auction_details.charms.row.charm_expansion|default(0) %}yes{% else %}no{% endif %}</td></tr>
+						<tr><td>Available Charm Points</td><td>{{ auction_details.charms.row.charm_points|default(0)|number_format }}</td></tr>
+						<tr><td>Available Minor Charm Echoes</td><td>{{ auction_details.charms.row.minor_charm_echoes|default(0)|number_format }}</td></tr>
+						<tr><td>Unlocked Runes</td><td>{{ auction_details.charms.unlocked_count }}</td></tr>
+						<tr><td>Used Runes</td><td>{{ auction_details.charms.used_count }}</td></tr>
+						<tr><td>Stored Charm Data</td><td>{{ auction_details.charms.charms_bytes|number_format }} bytes</td></tr>
+					</table>
+				</div>
+			{% elseif active_detail_tab == 'titles' %}
+				<div class="BazaarPanel">
+					<div class="BazaarPillList">
+						{% for row in auction_details.titles.entries %}
+							<span class="BazaarPill">{{ row.name }}</span>
+						{% else %}
+							<span class="BazaarMuted">{{ auction_details.titles.note }}</span>
+						{% endfor %}
+					</div>
+				</div>
+			{% elseif active_detail_tab == 'bestiary' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Bestiary Storage Entries</td><td>{{ auction_details.bestiary.storage_entries|number_format }}</td></tr>
+					</table>
+					<p class="BazaarMuted">{{ auction_details.bestiary.note }}</p>
+				</div>
+			{% elseif active_detail_tab == 'mastery' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Stored Mastery Data</td><td>{{ auction_details.mastery.bytes|number_format }} bytes</td></tr>
+					</table>
+					<p class="BazaarMuted">{{ auction_details.mastery.note }}</p>
+				</div>
+			{% elseif active_detail_tab == 'bosstiary' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Boss Slot One</td><td>{{ auction_details.bosstiary.row.bossIdSlotOne|default(0) }}</td></tr>
+						<tr><td>Boss Slot Two</td><td>{{ auction_details.bosstiary.row.bossIdSlotTwo|default(0) }}</td></tr>
+						<tr><td>Remove Times</td><td>{{ auction_details.bosstiary.row.removeTimes|default(0) }}</td></tr>
+						<tr><td>Stored Tracker Data</td><td>{{ auction_details.bosstiary.tracker_bytes|number_format }} bytes</td></tr>
+					</table>
+				</div>
+			{% elseif active_detail_tab == 'gems' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Initial Gem Records</td><td>{{ auction_details.gems.initial_gems_entries|number_format }}</td></tr>
+						<tr><td>Revealed Gems</td><td>{{ auction_details.gems.entries|length|number_format }}</td></tr>
+						<tr><td>Hunting Task Shop Extra Point Records</td><td>{{ auction_details.gems.wheel_extra_points_entries|number_format }}</td></tr>
+					</table>
+					<div class="BazaarPillList">
+						{% for row in auction_details.gems.entries %}
+							<span class="BazaarPill">Gem {{ loop.index }}</span>
+						{% else %}
+							<span class="BazaarMuted">{{ auction_details.gems.note }}</span>
+						{% endfor %}
+					</div>
+				</div>
+			{% elseif active_detail_tab == 'proficiency' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Virtue</td><td>{{ auction_details.proficiency.virtue }}</td></tr>
+						<tr><td>Harmony</td><td>{{ auction_details.proficiency.harmony }}</td></tr>
+						<tr><td>Stored Weapon Proficiency Data</td><td>{{ auction_details.proficiency.bytes|number_format }} bytes</td></tr>
+					</table>
+				</div>
+			{% elseif active_detail_tab == 'battlepass' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Completed Kill Tasks</td><td>{{ auction_details.battlepass.weekly.completed_kill_tasks|default(0) }}</td></tr>
+						<tr><td>Completed Delivery Tasks</td><td>{{ auction_details.battlepass.weekly.completed_delivery_tasks|default(0) }}</td></tr>
+						<tr><td>Reward Hunting Points</td><td>{{ auction_details.battlepass.weekly.reward_hunting_points|default(0) }}</td></tr>
+						<tr><td>Reward Soulseals</td><td>{{ auction_details.battlepass.weekly.reward_soulseals|default(0) }}</td></tr>
+						<tr><td>Unlocked Badges</td><td>{{ auction_details.battlepass.badges|length|number_format }}</td></tr>
+					</table>
+					<div class="BazaarPillList">
+						{% for row in auction_details.battlepass.badges %}
+							<span class="BazaarPill">{{ row.name }}</span>
+						{% endfor %}
+					</div>
+					<p class="BazaarMuted">{{ auction_details.battlepass.note }}</p>
+				</div>
+			{% elseif active_detail_tab == 'quests' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Quest Storage Entries</td><td>{{ auction_details.quests.storage_entries|number_format }}</td></tr>
+					</table>
+					<p class="BazaarMuted">{{ auction_details.quests.note }}</p>
+				</div>
+			{% elseif active_detail_tab == 'achievements' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Achievement Points</td><td>{{ auction_details.achievements.points|number_format }}</td></tr>
+						<tr><td>Tracked Achievements</td><td>{{ auction_details.achievements.entries|length|number_format }}</td></tr>
+					</table>
+					<div class="BazaarPillList">
+						{% for row in auction_details.achievements.entries %}
+							<span class="BazaarPill">{{ row.name }}</span>
+						{% else %}
+							<span class="BazaarMuted">{{ auction_details.achievements.note }}</span>
+						{% endfor %}
+					</div>
+				</div>
+			{% elseif active_detail_tab == 'bounty' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><td>Bounty Points</td><td>{{ auction_details.bounty.row.bounty_points|default(0)|number_format }}</td></tr>
+						<tr><td>Reroll Tokens</td><td>{{ auction_details.bounty.row.reroll_tokens|default(0) }}</td></tr>
+						<tr><td>Active Race ID</td><td>{{ auction_details.bounty.row.active_raceid|default(0) }}</td></tr>
+						<tr><td>Active Progress</td><td>{{ auction_details.bounty.row.active_kills|default(0) }} / {{ auction_details.bounty.row.active_required_kills|default(0) }}</td></tr>
+						<tr><td>Preferred Lists Data</td><td>{{ auction_details.bounty.preferred_bytes|number_format }} bytes</td></tr>
+					</table>
+				</div>
+			{% elseif active_detail_tab == 'hirelings' %}
+				<div class="BazaarPanel">
+					<table class="BazaarStatTable">
+						<tr><th>Name</th><th>Sex</th><th>Active</th></tr>
+						{% for row in auction_details.hirelings %}
+							<tr><td>{{ row.name }}</td><td>{{ row.sex }}</td><td>{% if row.active %}yes{% else %}no{% endif %}</td></tr>
+						{% else %}
+							<tr><td colspan="3">No hirelings unlocked.</td></tr>
+						{% endfor %}
+					</table>
+				</div>
+			{% endif %}
+		</div></td></tr>
+	</table>
+</div>
+<br/>
+{% endif %}
+
+<div class="TableContainer">
+	<table class="Table3" cellpadding="0" cellspacing="0">
+		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">Auction Filters</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
+		<tr><td><div class="InnerTableContainer">
+			<form method="get" action="{{ getLink('character-bazaar') }}">
+				<table width="100%" cellspacing="1" cellpadding="4">
+					<tr bgcolor="{{ getStyle(1) }}">
+						<td class="LabelV">Character Name:</td>
+						<td><input type="text" name="search" value="{{ filters.search }}" maxlength="50" style="width: 160px;"/></td>
+						<td class="LabelV">World Name:</td>
+						<td><input type="text" name="world_name" value="{{ filters.world_name }}" maxlength="50" placeholder="{{ current_world_name }}" style="width: 130px;"/></td>
+					</tr>
+					<tr bgcolor="{{ getStyle(2) }}">
+						<td class="LabelV">World Type:</td>
+						<td>
+							<select name="world_type" style="width: 166px;">
+								<option value="">Any</option>
+								{% for key, label in world_type_options %}
+									<option value="{{ key }}" {% if filters.world_type == key %}selected{% endif %}>{{ label }}</option>
+								{% endfor %}
+							</select>
+						</td>
+						<td class="LabelV">Vocation:</td>
+						<td>
+							<select name="vocation" style="width: 136px;">
+								<option value="">Any</option>
+								{% for key, label in vocation_options %}
+									<option value="{{ key }}" {% if filters.vocation != '' and filters.vocation == key %}selected{% endif %}>{{ label }}</option>
+								{% endfor %}
+							</select>
+						</td>
+					</tr>
+					<tr bgcolor="{{ getStyle(1) }}">
+						<td class="LabelV">Level:</td>
+						<td><input type="number" name="min_level" min="0" value="{{ filters.min_level }}" placeholder="Min" style="width: 70px;"/> <input type="number" name="max_level" min="0" value="{{ filters.max_level }}" placeholder="Max" style="width: 70px;"/></td>
+						<td class="LabelV">Skill:</td>
+						<td>
+							<select name="skill" style="width: 136px;">
+								{% for key, data in skill_options %}
+									<option value="{{ key }}" {% if filters.skill == key %}selected{% endif %}>{{ data.label }}</option>
+								{% endfor %}
+							</select>
+						</td>
+					</tr>
+					<tr bgcolor="{{ getStyle(2) }}">
+						<td class="LabelV">Skill Level:</td>
+						<td><input type="number" name="min_skill" min="0" value="{{ filters.min_skill }}" placeholder="Min" style="width: 70px;"/> <input type="number" name="max_skill" min="0" value="{{ filters.max_skill }}" placeholder="Max" style="width: 70px;"/></td>
+						<td class="LabelV">Sort By:</td>
+						<td>
+							<select name="sort" style="width: 180px;">
+								{% for key, label in sort_options %}
+									<option value="{{ key }}" {% if filters.sort == key %}selected{% endif %}>{{ label }}</option>
+								{% endfor %}
+							</select>
+						</td>
+					</tr>
+					<tr bgcolor="{{ getStyle(1) }}">
+						<td colspan="4" style="text-align: right;">
+							<input type="submit" value="Apply Filters"/>
+							<a href="{{ getLink('character-bazaar') }}" style="margin-left: 10px;">Reset</a>
+						</td>
+					</tr>
+				</table>
+			</form>
+			<p style="margin: 6px 0 0 0; font-size: 10px;">Current world: {{ current_world_name }} ({{ current_world_type }}).</p>
+		</div></td></tr>
+	</table>
+</div>
+<br/>
+
+<div class="TableContainer">
+	<table class="Table3" cellpadding="0" cellspacing="0">
+		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">Current Auctions</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
+		<tr><td><div class="InnerTableContainer">
+			<table width="100%" cellspacing="1" cellpadding="4">
+				<tr bgcolor="{{ config.vdarkborder }}" class="white"><th>Outfit</th><th>Character</th><th>World</th><th>Vocation</th><th>Level</th>{% if filters.skill != 'level' %}<th>{{ skill_options[filters.skill].label }}</th>{% endif %}<th>Visible Bid</th><th>Ends</th><th></th></tr>
+				{% for row in auctions %}
+					<tr bgcolor="{{ getStyle(loop.index) }}"><td style="width: 64px; height: 54px;"><img src="{{ row.outfit_url }}" alt="{{ row.player_name|e }} outfit" style="margin: -20px 0 -22px -12px;"/></td><td>{{ row.player_name|e }}</td><td>{{ row.world_name|e }}<br/><small>{{ row.world_type|e }}</small></td><td>{{ row.vocation_name|e }}</td><td>{{ row.level }}</td>{% if filters.skill != 'level' %}<td>{{ row.selected_skill_value }}</td>{% endif %}<td>{{ row.display_bid|number_format }} coins</td><td>{{ row.ends_at_short_text }}<br/><span class="bazaar-countdown" data-ends-at="{{ row.ends_at }}" style="color: red; font-weight: bold;">This auction ends in --:--:--</span></td><td><a href="{{ getLink('character-bazaar') }}?auction={{ row.id }}">View</a></td></tr>
+				{% else %}
+					<tr><td colspan="{{ filters.skill != 'level' ? 9 : 8 }}">There are no active character auctions.</td></tr>
+				{% endfor %}
+			</table>
+		</div></td></tr>
+	</table>
+</div>
+
+<script>
+(function () {
+	function pad(value) {
+		return value < 10 ? '0' + value : String(value);
+	}
+
+	function formatRemaining(seconds) {
+		if (seconds <= 0) {
+			return '00:00:00';
+		}
+
+		var hours = Math.floor(seconds / 3600);
+		var minutes = Math.floor((seconds % 3600) / 60);
+		var secs = seconds % 60;
+		return pad(hours) + ':' + pad(minutes) + ':' + pad(secs);
+	}
+
+	function updateBazaarCountdowns() {
+		var now = Math.floor(Date.now() / 1000);
+		var nodes = document.querySelectorAll('.bazaar-countdown[data-ends-at]');
+		for (var index = 0; index < nodes.length; index++) {
+			var node = nodes[index];
+			var endsAt = parseInt(node.getAttribute('data-ends-at'), 10);
+			if (!endsAt) {
+				continue;
+			}
+
+			node.textContent = 'This auction ends in ' + formatRemaining(endsAt - now);
+		}
+	}
+
+	updateBazaarCountdowns();
+	window.setInterval(updateBazaarCountdowns, 1000);
+})();
+</script>

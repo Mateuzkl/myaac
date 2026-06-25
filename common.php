@@ -27,7 +27,7 @@ if (version_compare(phpversion(), '8.1', '<')) die('PHP version 8.1 or higher is
 
 const MYAAC = true;
 const MYAAC_VERSION = '1.9.2-dev';
-const DATABASE_VERSION = 46;
+const DATABASE_VERSION = 47;
 const TABLE_PREFIX = 'myaac_';
 define('START_TIME', microtime(true));
 define('MYAAC_OS', stripos(PHP_OS, 'WIN') === 0 ? 'WINDOWS' : (strtoupper(PHP_OS) === 'DARWIN' ? 'MAC' : 'LINUX'));
@@ -96,6 +96,7 @@ const MENU_CATEGORY_COMMUNITY = 3;
 const MENU_CATEGORY_FORUM = 4;
 const MENU_CATEGORY_LIBRARY = 5;
 const MENU_CATEGORY_SHOP = 6;
+const MENU_CATEGORY_BAZAAR = 7;
 
 // otserv versions
 const OTSERV = 1;

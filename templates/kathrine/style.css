@@ -139,7 +139,8 @@ body
 #account-submenu,
 #community-submenu,
 #library-submenu,
-#shops-submenu
+#shops-submenu,
+#bazaar-submenu
 {
 	display: none;
 }
