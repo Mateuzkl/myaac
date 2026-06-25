@@ -301,8 +301,8 @@
 						<div class="BazaarPanelTitle">{{ group_label }} ({{ auction_details.items[group_key]|length }})</div>
 						<div class="BazaarItemGrid">
 							{% for item in auction_details.items[group_key] %}
-								<div class="BazaarItem" title="{{ item.name }}{% if item.source %} - {{ item.source }}{% endif %}">
-									<img src="{{ item.image_url }}" alt="{{ item.name }}" onerror="this.onerror=null;this.src='{{ item.fallback_url }}';"/>
+								<div class="BazaarItem" title="{{ item.name|e('html_attr') }}{% if item.source %} - {{ item.source|e('html_attr') }}{% endif %}">
+									<img src="{{ item.image_url|e('html_attr') }}" alt="{{ item.name|e('html_attr') }}" onerror="this.onerror=null;this.src='{{ item.fallback_url|e('html_attr') }}';"/>
 									{% if item.count > 1 %}<span class="BazaarItemCount">{{ item.count > 99 ? '99+' : item.count }}</span>{% endif %}
 								</div>
 							{% else %}
