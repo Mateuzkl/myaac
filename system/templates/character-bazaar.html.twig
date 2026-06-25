@@ -143,7 +143,7 @@
 	<table class="Table3" cellpadding="0" cellspacing="0">
 		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">Auction Cancelled</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
 		<tr><td><div class="InnerTableContainer">
-			<p style="color: green; font-weight: bold;">Your auction for {{ cancelled_auction.player_name }} has been cancelled.</p>
+			<p style="color: green; font-weight: bold;">Your auction for {{ cancelled_auction.player_name|e }} has been cancelled.</p>
 			<p>The character is no longer listed on the Character Bazaar.</p>
 			<p><a href="{{ getLink('character-bazaar') }}">Return to Character Bazaar</a></p>
 		</div></td></tr>
@@ -157,7 +157,7 @@
 	<table class="Table3" cellpadding="0" cellspacing="0">
 		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">Confirm Auction Cancellation</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
 		<tr><td><div class="InnerTableContainer">
-			<p style="color: red; font-weight: bold;">Do you really want to cancel the auction for {{ confirm_cancel_auction.player_name }}?</p>
+			<p style="color: red; font-weight: bold;">Do you really want to cancel the auction for {{ confirm_cancel_auction.player_name|e }}?</p>
 			<p>This action will remove the character from the Character Bazaar. The auction creation fee is not refunded.</p>
 			<table border="0" cellspacing="0" cellpadding="0">
 				<tr>
@@ -184,14 +184,14 @@
 {% if auction and not confirm_cancel_auction and not cancelled_auction %}
 <div class="TableContainer">
 	<table class="Table3" cellpadding="0" cellspacing="0">
-		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">{{ auction.player_name }}</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
+		<div class="CaptionContainer"><div class="CaptionInnerContainer"><span class="CaptionEdgeLeftTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightTop" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionBorderTop" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionVerticalLeft" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><div class="Text">{{ auction.player_name|e }}</div><span class="CaptionVerticalRight" style="background-image:url({{ template_path }}/images/content/box-frame-vertical.gif);"></span><span class="CaptionBorderBottom" style="background-image:url({{ template_path }}/images/content/table-headline-border.gif);"></span><span class="CaptionEdgeLeftBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span><span class="CaptionEdgeRightBottom" style="background-image:url({{ template_path }}/images/content/box-frame-edge.gif);"></span></div></div>
 		<tr><td><div class="InnerTableContainer">
 			<table width="100%" cellspacing="1" cellpadding="4">
 				<tr bgcolor="{{ config.vdarkborder }}" class="white"><th colspan="2">Auction Details</th></tr>
 				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Level:</td><td>{{ auction.level }}</td></tr>
-				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">World:</td><td>{{ auction.world_name }} ({{ auction.world_type }})</td></tr>
-				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Vocation:</td><td>{{ auction.vocation_name }}</td></tr>
-				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">Outfit:</td><td style="height: 64px;"><img src="{{ auction.outfit_url }}" alt="{{ auction.player_name }} outfit" style="margin: -16px 0 -18px -10px;"/></td></tr>
+				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">World:</td><td>{{ auction.world_name|e }} ({{ auction.world_type|e }})</td></tr>
+				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Vocation:</td><td>{{ auction.vocation_name|e }}</td></tr>
+				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">Outfit:</td><td style="height: 64px;"><img src="{{ auction.outfit_url }}" alt="{{ auction.player_name|e }} outfit" style="margin: -16px 0 -18px -10px;"/></td></tr>
 				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Start Price:</td><td>{{ auction.start_price|number_format }} coins</td></tr>
 				<tr bgcolor="{{ getStyle(2) }}"><td class="LabelV">Visible Bid:</td><td>{{ auction.display_bid|number_format }} coins</td></tr>
 				<tr bgcolor="{{ getStyle(1) }}"><td class="LabelV">Sale Commission:</td><td>{{ auction.sale_commission_percent }}% retained by the server after a successful sale.</td></tr>
@@ -287,8 +287,8 @@
 					<div class="BazaarPanel">
 						<div class="BazaarPanelTitle">Auction Summary</div>
 						<table class="BazaarStatTable">
-							<tr><td>World</td><td>{{ auction.world_name }} ({{ auction.world_type }})</td></tr>
-							<tr><td>Vocation</td><td>{{ auction.vocation_name }}</td></tr>
+							<tr><td>World</td><td>{{ auction.world_name|e }} ({{ auction.world_type|e }})</td></tr>
+							<tr><td>Vocation</td><td>{{ auction.vocation_name|e }}</td></tr>
 							<tr><td>Visible Bid</td><td>{{ auction.display_bid|number_format }} coins</td></tr>
 							<tr><td>Server Commission</td><td>{{ auction.sale_commission_percent }}%</td></tr>
 						</table>
